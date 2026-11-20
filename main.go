@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		log.Printf("[error] there was a problem connecting to the database: %s", err)
 	}
-	dbQueries := database.New(db)
+	_ = database.New(db)
 	cfg :=  &apiConfig{}
 	mux := http.NewServeMux()
 	server := &http.Server{

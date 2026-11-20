@@ -6,11 +6,13 @@ import (
 	"sync/atomic"
 	"encoding/json"
 	"log"
+	"github.com/montacore/chirpy/internal/database"
 )
 //NOTE: the `atomic.Int32` is a standard library type that allows us to
 // safely increment and read an integer value across multiple goroutines(HTTP reqs)
 type apiConfig struct {
 	fileserverHits atomic.Int32
+	db *database.Queries
 }
 
 // NOTE: middlewareMetricsInc takes one argument:

@@ -13,6 +13,7 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	db *database.Queries
+	platform string
 }
 
 // NOTE: middlewareMetricsInc takes one argument:
@@ -77,4 +78,21 @@ func (cfg *apiConfig)handlerValidateBody(w http.ResponseWriter, r *http.Request)
 		CleanedBody: cleanedResult,
 	})
 	
+}
+
+func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	newUser := User{}
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "there was a problem decoding JSON data")
+		return
+	}
+	user, err := cfg.db.CreateUser(ctx, newUser.Email)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "there was a problem creating a new user")
+		return
+	}
+	RespondWithJSON(w, http.StatusOK, newUser)
+
 }

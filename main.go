@@ -3,9 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
+	_ "github.com/lib/pq"
+	"os"
+	"database/sql"
+	"github.com/montacore/chirpy/internal/database"
 )
 
 func main() {
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Printf("[error] there was a problem connecting to the database: %s", err)
+	}
+	dbQueries := database.New(db)
 	cfg :=  &apiConfig{}
 	mux := http.NewServeMux()
 	server := &http.Server{

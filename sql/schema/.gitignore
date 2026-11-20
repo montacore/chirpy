@@ -1,0 +1,39 @@
+# Compiled binaries and libraries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+
+# Build and output directories
+/bin/
+/build/
+/dist/
+/tmp/
+
+# Test binaries and coverage artifacts
+*.test
+*.out
+*.prof
+*.coverprofile
+coverage.html
+coverage/
+
+# Go workspace files (local multi-module overrides)
+go.work
+go.work.sum
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+

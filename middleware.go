@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync/atomic"
+	"encoding/json"
+	"log"
 )
 //NOTE: the `atomic.Int32` is a standard library type that allows us to
 // safely increment and read an integer value across multiple goroutines(HTTP reqs)
@@ -25,9 +27,19 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Hits: %d\n", cfg.fileserverHits.Load())
+	fmt.Fprintf(
+		w, 
+		`
+<html>
+		<body>
+			<h1>Welcome, Chirpy Admin</h1>
+			<p>Chirpy has been visited %d times!</p>
+		</body>
+</html>
+		`,
+		cfg.fileserverHits.Load())
 }
 
 func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
@@ -35,3 +47,32 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+
+func (cfg *apiConfig)handlerValidateBody(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Body 	string		`json:"body"`
+	}
+	type response struct {
+		CleanedBody string `json:"cleaned_body"`
+	}
+	// TODO: Decode r.Body into parameters
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		log.Printf("Error decoding parameters: %s", err)
+		RespondWithError(w, http.StatusInternalServerError, "Something went wrong")
+		
+		return
+	}
+	// TODO: Check length and call respondWithError if invalid
+	if len(params.Body) > 140 {
+		RespondWithError(w, http.StatusBadRequest, "Chirp is too long")
+		return
+	}
+    cleanedResult := MaskProfanity(params.Body)
+	RespondWithJSON(w, http.StatusOK, response{
+		CleanedBody: cleanedResult,
+	})
+	
+}

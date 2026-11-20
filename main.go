@@ -13,13 +13,14 @@ func main() {
 		Handler: mux,
 	}
 	mux.HandleFunc("GET /api/healthz", func(w http.ResponseWriter, r *http.Request){
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 		})
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	mux.Handle("/app/", cfg.middlewareMetricsInc(handler))
-	mux.HandleFunc("GET /api/metrics", cfg.handlerMetrics)
-	mux.HandleFunc("POST /api/reset", cfg.handlerReset)
+	mux.HandleFunc("GET /admin/metrics", cfg.handlerMetrics)
+	mux.HandleFunc("POST /admin/reset", cfg.handlerReset)
+	mux.HandleFunc("POST /api/validate_chirp", cfg.handlerValidateBody)
 	log.Fatal(server.ListenAndServe())
 }

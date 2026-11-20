@@ -1,0 +1,25 @@
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0100    220 100     33 100    187  56122 310.5k                              0100    220 100     33 100    187  49034 271.3k                              0100    220 100     33 100    187  44117 244.1k                              0
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+Date: Thu, 19 Nov 2026 21:45:55 GMT
+Content-Length: 33
+
+{"error":"Internal server error"}  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0100     59 100     14 100     45  22617  72697                              0100     59 100     14 100     45  19886  63920                              0100     59 100     14 100     45  17971  57766                              0
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Thu, 19 Nov 2026 21:45:55 GMT
+Content-Length: 14
+
+{"valid":true}  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0100     37 100     23 100     14  34226  20833                              0100     37 100     23 100     14  29487  17948                              0100     37 100     23 100     14  26528  16147                              0
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Date: Thu, 19 Nov 2026 21:45:55 GMT
+Content-Length: 23
+
+{"error":"Bad Request"}

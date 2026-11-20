@@ -37,3 +37,5 @@ go.work.sum
 *~
 .DS_Store
 
+sql/schema/up_script.sh
+sql/schema/down_script.sh

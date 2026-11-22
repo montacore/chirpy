@@ -1,25 +1,0 @@
-  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
-                                 Dload  Upload  Total   Spent   Left   Speed
-  0      0   0      0   0      0      0      0                              0100    216 100     29 100    187  19754 124.3k                              0100    216 100     29 100    187  17354 109.2k                              0100    216 100     29 100    187  15441  99574                              0
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-Date: Thu, 19 Nov 2026 21:51:16 GMT
-Content-Length: 29
-
-{"error":"Chirp is too long"}  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
-                                 Dload  Upload  Total   Spent   Left   Speed
-  0      0   0      0   0      0      0      0                              0100     59 100     14 100     45  11014  35405                              0100     59 100     14 100     45   9517  30591                              0100     59 100     14 100     45   8500  27322                              0
-HTTP/1.1 200 OK
-Content-Type: application/json
-Date: Thu, 19 Nov 2026 21:51:16 GMT
-Content-Length: 14
-
-{"valid":true}  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
-                                 Dload  Upload  Total   Spent   Left   Speed
-  0      0   0      0   0      0      0      0                              0100     46 100     32 100     14  24691  10802                              0100     46 100     32 100     14  20645   9032                              0100     46 100     32 100     14  18390   8045                              0
-HTTP/1.1 500 Internal Server Error
-Content-Type: application/json
-Date: Thu, 19 Nov 2026 21:51:17 GMT
-Content-Length: 32
-
-{"error":"Something went wrong"}

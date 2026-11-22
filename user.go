@@ -1,10 +1,8 @@
 package main
 
 import (
-	"log"
 	"github.com/google/uuid"
 	"time"
-	"encoding/json"
 )
 
 type User struct {

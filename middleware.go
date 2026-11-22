@@ -46,6 +46,20 @@ func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	if cfg.platform != "dev" {
+		RespondWithError(w, http.StatusForbidden, "You are not authorized to reset database")
+	} else {
+		err  := cfg.db.Reset(ctx)
+		if err != nil {
+			RespondWithError(w, http.StatusInternalServerError, "Error resetting database")
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Reset complete"))
+		return
+	}
+
 	cfg.fileserverHits.Store(0)
 	w.WriteHeader(http.StatusOK)
 }
@@ -88,11 +102,15 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		RespondWithError(w, http.StatusBadRequest, "there was a problem decoding JSON data")
 		return
 	}
-	user, err := cfg.db.CreateUser(ctx, newUser.Email)
+	dbUser, err := cfg.db.CreateUser(ctx, newUser.Email)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "there was a problem creating a new user")
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, newUser)
+	RespondWithJSON(w, http.StatusOK, User{
+		Email: dbUser.Email,
+		
+	})
 
 }
+

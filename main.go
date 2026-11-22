@@ -7,7 +7,6 @@ import (
 	"os"
 	"database/sql"
 	"github.com/montacore/chirpy/internal/database"
-	"context"
 )
 
 func main() {
@@ -33,6 +32,6 @@ func main() {
 	mux.HandleFunc("GET /admin/metrics", cfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", cfg.handlerReset)
 	mux.HandleFunc("POST /api/validate_chirp", cfg.handlerValidateBody)
-	mux.HandleFunc("POST /api/users", cfg.handlerCreatePost)
+	mux.HandleFunc("POST /api/users", cfg.handlerCreateUser)
 	log.Fatal(server.ListenAndServe())
 }

@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"encoding/json"
 	"log"
+	"github.com/google/uuid"
 	"github.com/montacore/chirpy/internal/database"
 )
 //NOTE: the `atomic.Int32` is a standard library type that allows us to
@@ -49,29 +50,26 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if cfg.platform != "dev" {
 		RespondWithError(w, http.StatusForbidden, "You are not authorized to reset database")
-	} else {
-		err  := cfg.db.Reset(ctx)
-		if err != nil {
-			RespondWithError(w, http.StatusInternalServerError, "Error resetting database")
-		}
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Reset complete"))
 		return
 	}
+	err  := cfg.db.Reset(ctx)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "Error resetting database")
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	cfg.fileserverHits.Store(0)
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Reset complete"))
 }
 
 
-func (cfg *apiConfig)handlerValidateBody(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body 	string		`json:"body"`
+		UserID	uuid.UUID		`json:"user_id"`
 	}
-	type response struct {
-		CleanedBody string `json:"cleaned_body"`
-	}
+
 	// TODO: Decode r.Body into parameters
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -88,10 +86,18 @@ func (cfg *apiConfig)handlerValidateBody(w http.ResponseWriter, r *http.Request)
 		return
 	}
     cleanedResult := MaskProfanity(params.Body)
-	RespondWithJSON(w, http.StatusOK, response{
-		CleanedBody: cleanedResult,
+	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
+		Body: cleanedResult,
+		UserID: params.UserID,
 	})
-	
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "couldn't create chirp")
+		return
+	}
+	RespondWithJSON(w, http.StatusCreated, Chirp{
+		Body: chirp.Body,
+		UserID: chirp.UserID,
+	})
 }
 
 func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +113,10 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		RespondWithError(w, http.StatusInternalServerError, "there was a problem creating a new user")
 		return
 	}
-	RespondWithJSON(w, http.StatusOK, User{
+	RespondWithJSON(w, http.StatusCreated, User{
+		ID: dbUser.ID,
+		CreatedAt: dbUser.CreatedAt,
+		UpdatedAt: dbUser.UpdatedAt,
 		Email: dbUser.Email,
 		
 	})

@@ -1,5 +1,4 @@
 package main
-
 import (
 	"log"
 	"net/http"
@@ -7,16 +6,26 @@ import (
 	"os"
 	"database/sql"
 	"github.com/montacore/chirpy/internal/database"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("unable to retrieve .env file: %s\n", err)
+	}
+	platform := os.Getenv("PLATFORM")
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Printf("[error] there was a problem connecting to the database: %s", err)
 	}
-	_ = database.New(db)
-	cfg :=  &apiConfig{}
+	dbInst := database.New(db)
+	cfg :=  &apiConfig{
+		db: dbInst,
+		platform: platform,
+	}
+
 	mux := http.NewServeMux()
 	server := &http.Server{
 		Addr: ":8080",
@@ -31,7 +40,7 @@ func main() {
 	mux.Handle("/app/", cfg.middlewareMetricsInc(handler))
 	mux.HandleFunc("GET /admin/metrics", cfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", cfg.handlerReset)
-	mux.HandleFunc("POST /api/validate_chirp", cfg.handlerValidateBody)
+	mux.HandleFunc("POST /api/chirps", cfg.handlerChirpsCreate)
 	mux.HandleFunc("POST /api/users", cfg.handlerCreateUser)
 	log.Fatal(server.ListenAndServe())
 }

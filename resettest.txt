@@ -1,0 +1,30 @@
+Running next lesson:
+5.6 - Create User
+base_url: http://localhost:8080
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 1 · Reset the database
+Request: POST http://localhost:8080/admin/reset
+Safe step
+
+  Response status: 403
+
+  Response body
+    {
+      "error": "You are not authorized to reset database"
+    }
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 2 · Create the first user
+Request: POST http://localhost:8080/api/users
+
+  HTTP error
+    Failed to fetch: Post "http://localhost:8080/api/users": EOF
+
+────────────────────────────────────────────────────────────────────────────────
+STEP 3 · Create the second user
+Request: POST http://localhost:8080/api/users
+
+  HTTP error
+    Failed to fetch: Post "http://localhost:8080/api/users": EOF
+

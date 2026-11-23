@@ -18,7 +18,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Printf("[error] there was a problem connecting to the database: %s", err)
+		log.Fatalf("[error] there was a problem connecting to the database: %s", err)
 	}
 	dbInst := database.New(db)
 	cfg :=  &apiConfig{
@@ -34,7 +34,7 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", func(w http.ResponseWriter, r *http.Request){
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 		})
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	mux.Handle("/app/", cfg.middlewareMetricsInc(handler))
@@ -44,5 +44,6 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", cfg.handlerGetChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handlerGetChirp)
 	mux.HandleFunc("POST /api/users", cfg.handlerCreateUser)
+	mux.HandleFunc("POST /api/login", cfg.handlerPasswordLookup)
 	log.Fatal(server.ListenAndServe())
 }

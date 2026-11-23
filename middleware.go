@@ -23,6 +23,7 @@ type apiConfig struct {
 // 	and returns an instance of:
 // 				http.Handler
 // The function returns the result of a call to HandlerFunc(func(w http.ResponseWriter, r *http.Request))
+//TEST: entry endpoint "/app/"
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cfg.fileserverHits.Add(1)
@@ -31,10 +32,11 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	
 }
 
+//TEST: Endpoint: "GET /admin/metrics"
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(
+	_, _ = fmt.Fprintf(
 		w, 
 		`
 <html>
@@ -47,6 +49,7 @@ func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 		cfg.fileserverHits.Load())
 }
 
+//TEST: Endpoint: "POST /admin/reset"
 func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	if cfg.platform != "dev" {
@@ -61,10 +64,10 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 
 	cfg.fileserverHits.Store(0)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Reset complete"))
+	_,_ = w.Write([]byte("Reset complete"))
 }
 
-
+//TEST: Endpoint: "POST /api/chirps"
 func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body 	string		`json:"body"`
@@ -104,10 +107,11 @@ func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request)
 	})
 }
 
+// TEST: Endpoint: "POST /api/users"
 func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	type parameters struct {
-		Password string `json:"hashed_password"`
+		Password string `json:"password"`
 		Email string `json:"email"`
 	}
 	params := parameters{}
@@ -118,7 +122,8 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 	}
 	pass, err := auth.HashPassword(params.Password)
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, "error hashing password")
+		RespondWithError(w, http.StatusUnauthorized, "Incorrect email or password")
+		return
 	}
 	dbUser, err := cfg.db.CreateUser(ctx, database.CreateUserParams{
 		Email: params.Email,
@@ -137,7 +142,7 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 	})
 
 }
-
+//TEST: Endpoint: "GET /api/chirps"
 func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	chirps, err := cfg.db.GetChirps(ctx)
@@ -159,6 +164,7 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, out)
 }
 
+//TEST: "GET /api/chirps/{chirpID}"
 func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("chirpID")
 	id, err := uuid.Parse(idStr)
@@ -180,5 +186,41 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: chirp.UpdatedAt,
 		UserID: chirp.UserID,
 		Body: chirp.Body,
+	})
+}
+//TEST: "POST /api/login"
+func (cfg *apiConfig) handlerPasswordLookup(w http.ResponseWriter, r *http.Request) {
+	// TODO:
+	// Decode request body into a parameters struct
+	type parameters struct {
+		Email string `json:"email"`
+		Password string `json:"password"`
+	}
+	params := parameters{}
+	err := json.NewDecoder(r.Body).Decode(&params)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "there was a problem decoding JSON data")
+		return
+	}
+
+	//TODO: Look up the record by a unique field (not ID)
+	dbUser, err := cfg.db.GetUserByEmail(r.Context(), params.Email)
+	// TODO: if lookup fails, respond with error, return
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "error retrieving sql query lookup value")
+		return
+	}
+	// TODO: Verify the secret -> if error or no match, respond with error, return
+	match, err := auth.CheckPasswordHash(params.Password, dbUser.HashedPassword)
+	if err != nil  || !match {
+		RespondWithError(w, http.StatusUnauthorized, "Incorrect email or password")
+		return
+	}
+	// TODO: map to your response struct, respond 200
+	RespondWithJSON(w, http.StatusOK, User{
+		ID: dbUser.ID,
+		CreatedAt: dbUser.CreatedAt,
+		UpdatedAt: dbUser.UpdatedAt,
+		Email: dbUser.Email,
 	})
 }

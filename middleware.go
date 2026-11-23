@@ -8,6 +8,7 @@ import (
 	"log"
 	"github.com/google/uuid"
 	"github.com/montacore/chirpy/internal/database"
+	"github.com/montacore/chirpy/internal/auth"
 )
 //NOTE: the `atomic.Int32` is a standard library type that allows us to
 // safely increment and read an integer value across multiple goroutines(HTTP reqs)
@@ -105,13 +106,24 @@ func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request)
 
 func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	newUser := User{}
-	err := json.NewDecoder(r.Body).Decode(&newUser)
+	type parameters struct {
+		Password string `json:"hashed_password"`
+		Email string `json:"email"`
+	}
+	params := parameters{}
+	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
 		RespondWithError(w, http.StatusBadRequest, "there was a problem decoding JSON data")
 		return
 	}
-	dbUser, err := cfg.db.CreateUser(ctx, newUser.Email)
+	pass, err := auth.HashPassword(params.Password)
+	if err != nil {
+		RespondWithError(w, http.StatusBadRequest, "error hashing password")
+	}
+	dbUser, err := cfg.db.CreateUser(ctx, database.CreateUserParams{
+		Email: params.Email,
+		HashedPassword: pass,
+	})
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "there was a problem creating a new user")
 		return

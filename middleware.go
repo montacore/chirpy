@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"encoding/json"
 	"log"
+	"time"
 	"github.com/google/uuid"
 	"github.com/montacore/chirpy/internal/database"
 	"github.com/montacore/chirpy/internal/auth"
@@ -16,6 +17,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	db *database.Queries
 	platform string
+	secretKey string
 }
 
 // NOTE: middlewareMetricsInc takes one argument:
@@ -72,10 +74,12 @@ func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request)
 	type parameters struct {
 		Body 	string		`json:"body"`
 		UserID	uuid.UUID		`json:"user_id"`
+		ExpiresInSeconds time.Duration `json:"expires_in_seconds"`
 	}
 
 	// TODO: Decode r.Body into parameters
 	decoder := json.NewDecoder(r.Body)
+	ValidTil := 5 * time.Minute
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
@@ -83,6 +87,16 @@ func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request)
 		RespondWithError(w, http.StatusInternalServerError, "Something went wrong")
 		
 		return
+	}
+
+	token, err := auth.MakeJWT(params.UserID, cfg.secretKey, ValidTil)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "unable to complete request")
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.secretKey)
+	if err != nil {
+		RespondWithError(w, http.StatusForbidden, "unauthorized")
 	}
 	// TODO: Check length and call respondWithError if invalid
 	if len(params.Body) > 140 {

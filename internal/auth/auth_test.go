@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"testing"
 	"time"
+	"net/http"
 )
 
 func TestTokenRoundTrip(t *testing.T) {
@@ -61,4 +62,13 @@ func TestDifferentKeys(t *testing.T) {
 			t.Fatal("failed, token was validated with different keys")
 		}
 	})
+}
+
+func TestGetBearer(t *testing.T) {
+	h := http.Header{}
+	h.Set("Authorization", "Bearer abcdefg123")
+	got, err := GetBearerToken(h)
+	 if err != nil {
+		t.Errorf("got %q, err %v", got, err)
+	}
 }

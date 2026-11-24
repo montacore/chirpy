@@ -20,10 +20,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("[error] there was a problem connecting to the database: %s", err)
 	}
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET must be set")
+	}
 	dbInst := database.New(db)
 	cfg :=  &apiConfig{
 		db: dbInst,
 		platform: platform,
+		secretKey: secret,
 	}
 
 	mux := http.NewServeMux()

@@ -49,6 +49,6 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", cfg.handlerGetChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.handlerGetChirp)
 	mux.HandleFunc("POST /api/users", cfg.handlerCreateUser)
-	mux.HandleFunc("POST /api/login", cfg.handlerPasswordLookup)
+	mux.HandleFunc("POST /api/login", cfg.handlerLogin)
 	log.Fatal(server.ListenAndServe())
 }

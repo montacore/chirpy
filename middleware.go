@@ -73,31 +73,31 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body 	string		`json:"body"`
-		UserID	uuid.UUID		`json:"user_id"`
-		ExpiresInSeconds time.Duration `json:"expires_in_seconds"`
+	}
+	// TODO: authorization first and foremost
+	key, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		RespondWithError(w, http.StatusUnauthorized, "invalid or expired token")
+		return
+	}
+
+	userID, err := auth.ValidateJWT(key, cfg.secretKey)
+	if err != nil {
+		RespondWithError(w, http.StatusUnauthorized, "invalid or expired token")
+		return
 	}
 
 	// TODO: Decode r.Body into parameters
 	decoder := json.NewDecoder(r.Body)
-	ValidTil := 5 * time.Minute
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
-		RespondWithError(w, http.StatusInternalServerError, "Something went wrong")
+		RespondWithError(w, http.StatusBadRequest, "couldn't decode parameters")
 		
 		return
 	}
 
-	token, err := auth.MakeJWT(params.UserID, cfg.secretKey, ValidTil)
-	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "unable to complete request")
-	}
-
-	userID, err := auth.ValidateJWT(token, cfg.secretKey)
-	if err != nil {
-		RespondWithError(w, http.StatusForbidden, "unauthorized")
-	}
 	// TODO: Check length and call respondWithError if invalid
 	if len(params.Body) > 140 {
 		RespondWithError(w, http.StatusBadRequest, "Chirp is too long")
@@ -106,7 +106,7 @@ func (cfg *apiConfig)handlerChirpsCreate(w http.ResponseWriter, r *http.Request)
     cleanedResult := MaskProfanity(params.Body)
 	chirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body: cleanedResult,
-		UserID: params.UserID,
+		UserID: userID,
 	})
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "couldn't create chirp")
@@ -203,7 +203,7 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 	})
 }
 //TEST: "POST /api/login"
-func (cfg *apiConfig) handlerPasswordLookup(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	// TODO:
 	// Decode request body into a parameters struct
 	type parameters struct {
@@ -217,11 +217,12 @@ func (cfg *apiConfig) handlerPasswordLookup(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+
 	//TODO: Look up the record by a unique field (not ID)
 	dbUser, err := cfg.db.GetUserByEmail(r.Context(), params.Email)
 	// TODO: if lookup fails, respond with error, return
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "error retrieving sql query lookup value")
+		RespondWithError(w, http.StatusUnauthorized, "incorrect email or password, please try again")
 		return
 	}
 	// TODO: Verify the secret -> if error or no match, respond with error, return
@@ -230,11 +231,34 @@ func (cfg *apiConfig) handlerPasswordLookup(w http.ResponseWriter, r *http.Reque
 		RespondWithError(w, http.StatusUnauthorized, "Incorrect email or password")
 		return
 	}
+	
+	
+
+
+	token, err := auth.MakeJWT(dbUser.ID, cfg.secretKey, time.Hour)
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "unable to complete request")
+		return
+	}
+	sessionToken := auth.MakeRefreshToken()
+	_, err = cfg.db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token: sessionToken,
+		UserID: dbUser.ID,
+		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60), // 7 days 
+	})
+	if err != nil {
+		RespondWithError(w, http.StatusInternalServerError, "error creating refresh token")
+		return
+	}
+
+
 	// TODO: map to your response struct, respond 200
 	RespondWithJSON(w, http.StatusOK, User{
 		ID: dbUser.ID,
 		CreatedAt: dbUser.CreatedAt,
 		UpdatedAt: dbUser.UpdatedAt,
 		Email: dbUser.Email,
+		Token: token,
+		RefreshToken: sessionToken, 
 	})
 }

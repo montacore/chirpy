@@ -244,7 +244,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	_, err = cfg.db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
 		Token: sessionToken,
 		UserID: dbUser.ID,
-		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60), // 7 days 
+		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60), // 60 days
 	})
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "error creating refresh token")

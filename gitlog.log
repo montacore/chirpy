@@ -1,0 +1,113 @@
+commit 5a99a05f865f9b1cb6f7fbaa7b1288d71ecf54e3 (HEAD -> main, origin/main)
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Thu Nov 26 09:45:51 2026 -0500
+
+    added DELETE chirp functionality
+
+commit c201de32bb9afa22bd8b53371ab1628599197a61
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Thu Nov 26 05:05:56 2026 -0500
+
+    project restruct to remove handlers from middleware.go and move them into their own dedicated files per handler
+
+commit 68d6c5d1ada618475bb1841e026be9c35a51911f
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Thu Nov 26 03:03:36 2026 -0500
+
+    authorization updates
+
+commit 0df4e5ee2768629da369cc70dd038a3f96e1c0eb
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Wed Nov 25 19:30:45 2026 -0500
+
+    added refresh tokens
+
+commit faf1524eebe36d4775d54d3e44a1c82698f977c7
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Tue Nov 24 16:51:09 2026 -0500
+
+    updates to auth
+
+commit 1a8bd8c5b780cb65c68dd9de34ada9ef31babb28
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Tue Nov 24 15:57:42 2026 -0500
+
+    added JWT creation and validation within auth package
+
+commit 8d460694769928053063d010792e51c156a91fe5
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Mon Nov 23 13:26:21 2026 -0500
+
+    added password hashing and user authentication
+
+commit 0de4d9c78bdc13c8da8734ad8b3a06040be46629
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Mon Nov 23 03:10:02 2026 -0500
+
+    beginning authorization integration
+
+commit 5d5a3cb614d30c6b3ef0202a095b29a6eeb41df6
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Sun Nov 22 20:31:44 2026 -0500
+
+    added functionality for GetChirps and GetChirp
+
+commit ccf38aada82711ec34bf154c52b1c0c03c01a774
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Sun Nov 22 04:33:26 2026 -0500
+
+    added functionality to create a new Chirp and add the value to db
+
+commit 91127e4cbce39e18a06cce208b0b98edd27f9e29
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Sat Nov 21 20:12:06 2026 -0500
+
+    handled Reset and CreateUser functions
+
+commit 6cc9c1314c55e86ae32ef1eae98b71f25bec4c8d
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Fri Nov 20 11:40:21 2026 -0500
+
+    progress
+
+commit 1482468646595ed3c84fa88a1e3b1966c8bf1a38
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Fri Nov 20 09:13:48 2026 -0500
+
+    adding project structure
+
+commit c013faf2e98f24d2e443f792f695f9a347dc7758
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Fri Nov 20 02:15:13 2026 -0500
+
+    updating project structure and adding SQL integration via postgres
+
+commit 8e28382cdb10114e09fb06a1d289394dac4310ae
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Fri Nov 20 00:13:26 2026 -0500
+
+    removing up and down scripts
+
+commit 541f879e8d66c17582d2f4ff544ded6ff5be92c0
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Fri Nov 20 00:11:47 2026 -0500
+
+    added project structure and imported necessary libraries
+
+commit d012f11bf9bd08d0eed1ffa38489c0a19362b982
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Thu Nov 19 01:10:14 2026 -0500
+
+    switched to a decoupled structure for the api calls
+
+commit 44f3856dbc934012ad68259b253c3e3eb1e135d8
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Thu Nov 19 00:03:18 2026 -0500
+
+    completed the reset, metrics, and middlewareMetricsInc command
+
+commit 85eec4ba187d7fffb5a9ee4799f79ae4401dd778
+Author: montacore <john.t.nallie@gmail.com>
+Date:   Wed Nov 18 02:48:54 2026 -0500
+
+    initial project commit

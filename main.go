@@ -29,6 +29,7 @@ func main() {
 		db: dbInst,
 		platform: platform,
 		secretKey: secret,
+		polkaKey: os.Getenv("POLKA_KEY"),
 	}
 
 	mux := http.NewServeMux()
@@ -54,5 +55,6 @@ func main() {
 	mux.HandleFunc("POST /api/revoke", cfg.handlerRevoke)
 	mux.HandleFunc("PUT /api/users", cfg.handlerUpdateUser)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.handlerDeleteChirp)
+	mux.HandleFunc("POST /api/polka/webhooks", cfg.handlerVerifyUpgrade)
 	log.Fatal(server.ListenAndServe())
 }

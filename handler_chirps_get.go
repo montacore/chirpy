@@ -4,11 +4,24 @@ import (
 	"net/http"
 	"log"
 	"github.com/google/uuid"
+	"github.com/montacore/chirpy/internal/database"
 ) 
 //TEST: Endpoint: "GET /api/chirps"
 func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	chirps, err := cfg.db.GetChirps(ctx)
+	var chirps []database.Chirp
+	var err error
+	s := r.URL.Query().Get("author_id")
+	if s == "" {
+	chirps, err = cfg.db.GetChirps(ctx)
+	} else {
+		id, parseErr := uuid.Parse(s)
+		if parseErr != nil {
+			RespondWithError(w, http.StatusBadRequest, "unable to parse author_id")
+			return
+		}
+		chirps, err = cfg.db.GetChirpsByAuthor(ctx, id)
+	}
 	if err != nil {
 		log.Printf("error getting chirps: %s", err)
 		RespondWithError(w, http.StatusInternalServerError, "there was a problem retrieving chirps")

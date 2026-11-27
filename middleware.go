@@ -14,6 +14,7 @@ type apiConfig struct {
 	db *database.Queries
 	platform string
 	secretKey string
+	polkaKey string
 }
 
 // NOTE: middlewareMetricsInc takes one argument:

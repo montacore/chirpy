@@ -5,6 +5,7 @@ import (
 	"log"
 	"github.com/google/uuid"
 	"github.com/montacore/chirpy/internal/database"
+	"sort"
 ) 
 //TEST: Endpoint: "GET /api/chirps"
 func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +28,12 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, http.StatusInternalServerError, "there was a problem retrieving chirps")
 		return
 	}
+	sortParam := r.URL.Query().Get("sort")
+	order := "asc"
+	if sortParam == "desc" {
+		order = "desc"
+	}
+
 	out := []Chirp{}
 	for _, o := range chirps {
 		out = append(out, Chirp{
@@ -37,6 +44,12 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 			UserID: o.UserID,
 		})
 	}
+	sort.Slice(out, func(i, j int) bool {
+		if order == "desc" {
+			return out[i].CreatedAt.After(out[j].CreatedAt)
+		}
+		return out[i].CreatedAt.Before(out[j].CreatedAt)
+	})
 	RespondWithJSON(w, http.StatusOK, out)
 }
 
